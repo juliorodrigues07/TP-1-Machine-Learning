@@ -1,16 +1,23 @@
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.impute import SimpleImputer
 from sklearn import tree
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import warnings
 import graphviz
 import os
+
+
+warnings.filterwarnings("ignore")
 
 
 def pre_processing(attributes, classes):
@@ -36,18 +43,22 @@ def pre_processing(attributes, classes):
     return attributes, classes
 
 
-def decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes):
+def decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes, class_names):
 
     # Construção da árvore de decisão e treinamento do classificador
     classifier.fit(training_attributes, training_classes)
     predictions = classifier.predict(test_attributes)
+
+    # Exibe um resumo dos resultados da predição para cada rótulo e imprime a matriz de confusão
+    print(classification_report(test_classes, predictions, target_names=class_names))
+    print(confusion_matrix(test_classes, predictions))
 
     # Resultado
     result = accuracy_score(test_classes, predictions)
     return result
 
 
-def ordinary_tests(attributes, classes):
+def ordinary_tests(attributes, classes, class_names):
 
     # TODO: Ajustar a proporção dos conjuntos de treinamento e teste para aplicar o modelo de aprendizado
     # Divisão do conjunto de treinamento e teste (80% e 20%)
@@ -56,8 +67,8 @@ def ordinary_tests(attributes, classes):
 
     classifier = tree.DecisionTreeClassifier(criterion='entropy', random_state=0)
 
-    result = decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes)
-    print('Testes normais: ' + str(result) + '\n')
+    result = decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes, class_names)
+    print('\nTestes normais: ' + str(result))
 
 
 def cv_tests(attributes, classes):
@@ -122,6 +133,9 @@ def plot_correlation_matrix(df, graphWidth):
 
 def main():
 
+    class_names = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost',
+                   'grass', 'ground', 'ice', 'normal', 'poison', 'psyquic', 'rock', 'steel', 'water']
+
     # TODO: Avaliar desempenho do método de ML e possível aplicação de outros
     pokemon_dataset = pd.read_csv('pokemon.csv')
     pokemon_dataset.dataframeName = 'pokemon.csv'
@@ -134,7 +148,7 @@ def main():
     model_predictors, model_class = pre_processing(model_predictors.copy(), model_class.copy())
 
     # Treinamento normal
-    ordinary_tests(model_predictors, model_class)
+    ordinary_tests(model_predictors, model_class, class_names)
 
     # Treinamento com validação cruzada
     cv_tests(model_predictors, model_class)
