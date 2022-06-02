@@ -3,6 +3,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -13,11 +14,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import warnings
-import graphviz
-import os
 
 
 warnings.filterwarnings("ignore")
+
+
+def dataset_divisor():
+
+    pokemon_dateset = pd.read_csv('pokemon.csv')
+
+    model_predictors = pokemon_dateset.drop(['type1', 'type2'], axis='columns')
+    model_class = pokemon_dateset['type1']
+
+    return model_predictors, model_class
 
 
 def pre_processing(attributes, classes):
@@ -49,9 +58,7 @@ def decision_tree(classifier, training_attributes, training_classes, test_attrib
     classifier.fit(training_attributes, training_classes)
     predictions = classifier.predict(test_attributes)
 
-    # Exibe um resumo dos resultados da predição para cada rótulo e imprime a matriz de confusão
-    print(classification_report(test_classes, predictions, target_names=class_names))
-    print(confusion_matrix(test_classes, predictions))
+    summary(class_names, test_classes, predictions)
 
     # Resultado
     result = accuracy_score(test_classes, predictions)
@@ -61,14 +68,19 @@ def decision_tree(classifier, training_attributes, training_classes, test_attrib
 def ordinary_tests(attributes, classes, class_names):
 
     # TODO: Ajustar a proporção dos conjuntos de treinamento e teste para aplicar o modelo de aprendizado
+
     # Divisão do conjunto de treinamento e teste (80% e 20%)
-    training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes, classes,
-                                                                                        test_size=0.2, random_state=0)
+    training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes,
+                                                                                            classes,
+                                                                                            test_size=0.2,
+                                                                                            random_state=0)
 
     classifier = tree.DecisionTreeClassifier(criterion='entropy', random_state=0)
 
     result = decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes, class_names)
     print('\nTestes normais: ' + str(result))
+
+    return classifier
 
 
 def cv_tests(attributes, classes):
@@ -80,6 +92,31 @@ def cv_tests(attributes, classes):
 
     result = np.mean(scores)
     print('\nValidação Cruzada: ' + str(result) + '\n')
+
+
+def random_forest(attributes, classes, class_names):
+
+    training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes,
+                                                                                            classes,
+                                                                                            test_size=0.2,
+                                                                                            random_state=0)
+
+    # Construção da floresta aleatória e treinamento do classificador
+    classifier = RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=0)
+    classifier.fit(training_attributes, training_classes)
+    predictions = classifier.predict(test_attributes)
+
+    summary(class_names, test_classes, predictions)
+
+    result = accuracy_score(test_classes, predictions)
+    print('\nFloresta Aleatória: ' + str(result) + '\n')
+
+
+def summary(class_names, test_classes, predictions):
+
+    # Exibe um resumo dos resultados da predição para cada rótulo e imprime a matriz de confusão
+    print(classification_report(test_classes, predictions, target_names=class_names))
+    print(confusion_matrix(test_classes, predictions))
 
 
 def plot_per_column_distribution(df, nGraphShown, nGraphPerRow):
@@ -131,35 +168,14 @@ def plot_correlation_matrix(df, graphWidth):
     plt.show()
 
 
-def main():
+def info_plots(classifier):
 
-    class_names = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost',
-                   'grass', 'ground', 'ice', 'normal', 'poison', 'psyquic', 'rock', 'steel', 'water']
-
-    # TODO: Avaliar desempenho do método de ML e possível aplicação de outros
     pokemon_dataset = pd.read_csv('pokemon.csv')
     pokemon_dataset.dataframeName = 'pokemon.csv'
 
-    # Divisão da base de dados entre atributos e classe
-    model_predictors = pokemon_dataset.drop(['type1', 'type2'], axis='columns')
-    model_class = pokemon_dataset['type1']
-
-    # Pré-Processamento
-    model_predictors, model_class = pre_processing(model_predictors.copy(), model_class.copy())
-
-    # Treinamento normal
-    ordinary_tests(model_predictors, model_class, class_names)
-
-    # Treinamento com validação cruzada
-    cv_tests(model_predictors, model_class)
-
-    # fig, _ = plt.subplots(nrows=1, ncols=1, figsize=(8, 8), dpi=300)
-    # tree.plot_tree(classifier, filled=True)
-    # fig.savefig('tree.png')
+    fig, _ = plt.subplots(nrows=1, ncols=1, figsize=(8, 8), dpi=300)
+    tree.plot_tree(classifier, filled=True)
+    fig.savefig('tree.png')
 
     # plot_per_column_distribution(pokemon_dataset, 24, 4)
     plot_correlation_matrix(pokemon_dataset, 8)
-
-
-if __name__ == '__main__':
-    main()
