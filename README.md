@@ -16,4 +16,11 @@
         
  # Execução
  
-        python3 tp1_ML.py
+ Árvore de Decisão:              
+                                                       
+    python3 pokemon_decision-tree.py
+    
+ Floresta Aleatória:
+ 
+    python3 pokemon_random-forest.py 
+        
