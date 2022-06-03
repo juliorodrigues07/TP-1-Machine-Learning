@@ -1,5 +1,5 @@
 # Classificação de pokémons por tipo utilizando métodos de aprendizado de máquina
- Implementação de um modelo de aprendizado de máquina aupervisionado para classificação de pokémons por tipo, utilizando Árvore de Decisão, Floresta Aleatória, testes com validação cruzada e algumas técnicas de pré-processamento (Trabalho Prático 1 da disciplina de Aprendizado de Máquina - DCOMP - UFSJ).
+ Implementação de um modelo de aprendizado de máquina supervisionado para classificação de pokémons por tipo, utilizando Árvore de Decisão, Floresta Aleatória, testes com validação cruzada e algumas técnicas de pré-processamento (Trabalho Prático 1 da disciplina de Aprendizado de Máquina - DCOMP - UFSJ).
  
  # Requisitos
  
