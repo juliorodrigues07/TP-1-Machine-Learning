@@ -1,9 +1,11 @@
+from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -34,20 +36,28 @@ def pre_processing(attributes, classes):
     # Discretiza os valores atributos qualitativos ('abilities, 'classification', 'japanese_name', 'name')
     l_encoder_attributes = ColumnTransformer(transformers=[('OneHot', OneHotEncoder(), [0, 24, 29, 30])],
                                              remainder='passthrough')
-    attributes = l_encoder_attributes.fit_transform(attributes).toarray()
+    attributes = l_encoder_attributes.fit_transform(attributes.copy()).toarray()
 
     # TODO: Ajustar estratégia de preenchimento de valores ausentes ('mean', 'median', 'most_frequent', 'constant')
+
     # Preenche missing values com a média
     fill_mv = SimpleImputer(strategy='mean')
-    attributes = fill_mv.fit_transform(attributes)
+    attributes = fill_mv.fit_transform(attributes.copy())
+
+    # Descarta atributos irrelevantes (Ganho de informação pequeno ou nulo)
+    # classifier = ExtraTreesClassifier(n_estimators=100)
+    # classifier = classifier.fit(attributes, classes)
+
+    # discard = SelectFromModel(classifier, prefit=True)
+    # attributes = discard.transform(attributes.copy())
 
     # Discretiza os valores da classe
     l_encoder_classes = LabelEncoder()
-    classes = l_encoder_classes.fit_transform(classes)
+    classes = l_encoder_classes.fit_transform(classes.copy())
 
     # Redistribuição dos dados
     scaler = StandardScaler()
-    attributes = scaler.fit_transform(attributes)
+    attributes = scaler.fit_transform(attributes.copy())
 
     return attributes, classes
 
@@ -170,6 +180,7 @@ def plot_correlation_matrix(df, graphWidth):
 
 def info_plots(classifier):
 
+    # TODO: Plotar gráfico das curvas de treinamento e teste
     pokemon_dataset = pd.read_csv('pokemon.csv')
     pokemon_dataset.dataframeName = 'pokemon.csv'
 
