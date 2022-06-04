@@ -1,3 +1,5 @@
+from sklearn.tree import DecisionTreeClassifier
+from ml_methods import plot_learning_curve
 from ml_methods import dataset_divisor
 from ml_methods import pre_processing
 from ml_methods import ordinary_tests
@@ -10,7 +12,7 @@ def main():
     class_names = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost',
                    'grass', 'ground', 'ice', 'normal', 'poison', 'psyquic', 'rock', 'steel', 'water']
 
-    # Divisão da base de dados entre atributos e classe
+    # Coleta dos atributos e da classe na base de dados
     model_predictors, model_class = dataset_divisor()
 
     # Pré-Processamento
@@ -24,6 +26,10 @@ def main():
 
     # Plots da árvore de decisão, matriz de correlação e afins
     # info_plots(classifier)
+
+    # Plot das curvas de aprendizado (Análise de overfitting e underfitting)
+    # algorithm = DecisionTreeClassifier()
+    # plot_learning_curve(model_predictors, model_class, algorithm, 18)
 
 
 if __name__ == '__main__':

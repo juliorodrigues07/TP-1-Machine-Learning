@@ -1,3 +1,5 @@
+from sklearn.ensemble import RandomForestClassifier
+from ml_methods import plot_learning_curve
 from ml_methods import dataset_divisor
 from ml_methods import pre_processing
 from ml_methods import random_forest
@@ -5,10 +7,10 @@ from ml_methods import random_forest
 
 def main():
 
-    class_names = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'ghost',
-                   'grass', 'ground', 'ice', 'normal', 'poison', 'psyquic', 'rock', 'steel', 'water']
+    class_names = ['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'ghost', 'grass',
+                   'ground', 'ice', 'normal', 'poison', 'psyquic', 'rock', 'steel', 'water']
 
-    # Divisão da base de dados entre atributos e classe
+    # Coleta dos atributos e da classe na base de dados
     model_predictors, model_class = dataset_divisor()
 
     # Pré-Processamento
@@ -16,6 +18,10 @@ def main():
 
     # Treinamento do modelo
     random_forest(model_predictors, model_class, class_names)
+
+    # Plot das curvas de aprendizado (Análise de overfitting e underfitting)
+    # algorithm = RandomForestClassifier()
+    # plot_learning_curve(model_predictors, model_class, algorithm, 18)
 
 
 if __name__ == '__main__':
