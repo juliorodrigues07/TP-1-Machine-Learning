@@ -1,6 +1,7 @@
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import learning_curve
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
@@ -37,8 +38,6 @@ def pre_processing(attributes, classes):
     l_encoder_attributes = ColumnTransformer(transformers=[('OneHot', OneHotEncoder(), [0, 24, 29, 30])],
                                              remainder='passthrough')
     attributes = l_encoder_attributes.fit_transform(attributes.copy()).toarray()
-
-    # TODO: Ajustar estratégia de preenchimento de valores ausentes ('mean', 'median', 'most_frequent', 'constant')
 
     # Preenche missing values com a média
     fill_mv = SimpleImputer(strategy='mean')
@@ -77,8 +76,6 @@ def decision_tree(classifier, training_attributes, training_classes, test_attrib
 
 def ordinary_tests(attributes, classes, class_names):
 
-    # TODO: Ajustar a proporção dos conjuntos de treinamento e teste para aplicar o modelo de aprendizado
-
     # Divisão do conjunto de treinamento e teste (80% e 20%)
     training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes,
                                                                                             classes,
@@ -97,7 +94,6 @@ def cv_tests(attributes, classes):
 
     classifier = tree.DecisionTreeClassifier(criterion='entropy')
 
-    # TODO: Ajustar escolha do valor de k para aplicação de testes com validação cruzada
     scores = cross_val_score(estimator=classifier, X=attributes, y=classes, cv=10, n_jobs=-1)
 
     result = np.mean(scores)
@@ -178,15 +174,42 @@ def plot_correlation_matrix(df, graphWidth):
     plt.show()
 
 
+def plot_learning_curve(attributes, classes, algorithm, n_trainings):
+
+    training_sizes, training_scores, test_scores = learning_curve(algorithm, attributes, classes,
+                                                                  train_sizes=np.linspace(0.05, 1, n_trainings),
+                                                                  cv=10,
+                                                                  scoring='accuracy',
+                                                                  n_jobs=-1)
+
+    training_scores_mean = np.mean(training_scores, axis=1)
+    training_scores_std = np.std(training_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+
+    plt.grid()
+    plt.title('Curvas de Aprendizado')
+    plt.xlabel('Tamanho do conjunto de treinamento')
+    plt.ylabel('Acurácia')
+
+    plt.plot(training_sizes, training_scores_mean, color='b', label='Treinamento')
+    plt.plot(training_sizes, test_scores_mean, color='r', label='Validação Cruzada')
+    plt.fill_between(training_sizes, training_scores_mean - training_scores_std,
+                     training_scores_mean + training_scores_std, color='#DDDDDD')
+    plt.fill_between(training_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, color='#DDDDDD')
+    plt.legend(loc='best')
+    plt.show()
+
+
 def info_plots(classifier):
 
-    # TODO: Plotar gráfico das curvas de treinamento e teste
     pokemon_dataset = pd.read_csv('pokemon.csv')
     pokemon_dataset.dataframeName = 'pokemon.csv'
+
+    # plot_per_column_distribution(pokemon_dataset, 24, 4)
+    plot_correlation_matrix(pokemon_dataset, 8)
 
     fig, _ = plt.subplots(nrows=1, ncols=1, figsize=(8, 8), dpi=300)
     tree.plot_tree(classifier, filled=True)
     fig.savefig('tree.png')
-
-    # plot_per_column_distribution(pokemon_dataset, 24, 4)
-    plot_correlation_matrix(pokemon_dataset, 8)
