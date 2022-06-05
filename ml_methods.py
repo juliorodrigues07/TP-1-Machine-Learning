@@ -8,6 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.compose import ColumnTransformer
+from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
@@ -84,17 +85,16 @@ def ordinary_tests(attributes, classes, class_names):
 
     classifier = tree.DecisionTreeClassifier(criterion='entropy', random_state=0)
 
-    result = decision_tree(classifier, training_attributes, training_classes, test_attributes, test_classes, class_names)
+    result = decision_tree(classifier, training_attributes, training_classes,
+                           test_attributes, test_classes, class_names)
     print('\nTestes normais: ' + str(result))
 
     return classifier
 
 
-def cv_tests(attributes, classes):
+def cv_tests(attributes, classes, algorithm):
 
-    classifier = tree.DecisionTreeClassifier(criterion='entropy')
-
-    scores = cross_val_score(estimator=classifier, X=attributes, y=classes, cv=10, n_jobs=-1)
+    scores = cross_val_score(estimator=algorithm, X=attributes, y=classes, cv=10, n_jobs=-1)
 
     result = np.mean(scores)
     print('\nValidação Cruzada: ' + str(result) + '\n')
@@ -120,9 +120,14 @@ def random_forest(attributes, classes, class_names):
 
 def summary(class_names, test_classes, predictions):
 
-    # Exibe um resumo dos resultados da predição para cada rótulo e imprime a matriz de confusão
+    # Exibe um resumo dos resultados da predição para cada rótulo e plota a matriz de confusão
     print(classification_report(test_classes, predictions, target_names=class_names))
-    print(confusion_matrix(test_classes, predictions))
+
+    ConfusionMatrixDisplay.from_predictions(test_classes, predictions,
+                                            display_labels=class_names, xticks_rotation='vertical')
+    plt.xlabel('Previsões')
+    plt.ylabel('Tipo verdadeiro')
+    plt.show()
 
 
 def plot_per_column_distribution(df, nGraphShown, nGraphPerRow):
@@ -176,16 +181,21 @@ def plot_correlation_matrix(df, graphWidth):
 
 def plot_learning_curve(attributes, classes, algorithm, n_trainings):
 
-    training_sizes, training_scores, test_scores = learning_curve(algorithm, attributes, classes,
-                                                                  train_sizes=np.linspace(0.05, 1, n_trainings),
-                                                                  cv=10,
-                                                                  scoring='accuracy',
-                                                                  n_jobs=-1)
+    training_sizes, training_scores, cv_scores = learning_curve(algorithm, attributes, classes,
+                                                                train_sizes=np.linspace(0.05, 1, n_trainings),
+                                                                cv=10,
+                                                                scoring='accuracy',
+                                                                n_jobs=-1)
+
+    _, _, test_scores = learning_curve(algorithm, attributes, classes, train_sizes=np.linspace(0.05, 1, n_trainings),
+                                       scoring='accuracy', n_jobs=-1)
 
     training_scores_mean = np.mean(training_scores, axis=1)
     training_scores_std = np.std(training_scores, axis=1)
-    test_scores_mean = np.mean(test_scores, axis=1)
-    test_scores_std = np.std(test_scores, axis=1)
+    cv_scores_mean = np.mean(cv_scores, axis=1)
+    cv_scores_std = np.std(cv_scores, axis=1)
+    tests_mean = np.mean(test_scores, axis=1)
+    # tests_std = np.mean(test_scores, axis=1)
 
     plt.grid()
     plt.title('Curvas de Aprendizado')
@@ -193,11 +203,12 @@ def plot_learning_curve(attributes, classes, algorithm, n_trainings):
     plt.ylabel('Acurácia')
 
     plt.plot(training_sizes, training_scores_mean, color='b', label='Treinamento')
-    plt.plot(training_sizes, test_scores_mean, color='r', label='Validação Cruzada')
+    plt.plot(training_sizes, tests_mean, color='g', label='Testes Ordinários')
+    plt.plot(training_sizes, cv_scores_mean, color='r', label='Validação Cruzada')
     plt.fill_between(training_sizes, training_scores_mean - training_scores_std,
                      training_scores_mean + training_scores_std, color='#DDDDDD')
-    plt.fill_between(training_sizes, test_scores_mean - test_scores_std,
-                     test_scores_mean + test_scores_std, color='#DDDDDD')
+    plt.fill_between(training_sizes, cv_scores_mean - cv_scores_std,
+                     cv_scores_mean + cv_scores_std, color='#DDDDDD')
     plt.legend(loc='best')
     plt.show()
 
