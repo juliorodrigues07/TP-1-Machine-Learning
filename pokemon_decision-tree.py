@@ -22,14 +22,14 @@ def main():
     classifier = ordinary_tests(model_predictors, model_class, class_names)
 
     # Treinamento com validação cruzada
-    cv_tests(model_predictors, model_class)
+    algorithm = DecisionTreeClassifier(criterion='entropy')
+    cv_tests(model_predictors, model_class, algorithm)
 
     # Plots da árvore de decisão, matriz de correlação e afins
     # info_plots(classifier)
 
     # Plot das curvas de aprendizado (Análise de overfitting e underfitting)
-    # algorithm = DecisionTreeClassifier()
-    # plot_learning_curve(model_predictors, model_class, algorithm, 18)
+    # plot_learning_curve(model_predictors, model_class, algorithm, 40)
 
 
 if __name__ == '__main__':
