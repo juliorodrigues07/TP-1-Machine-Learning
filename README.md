@@ -1,18 +1,26 @@
+[![Python 3.9](https://img.shields.io/badge/python-3.8.10-blue.svg)](https://www.python.org/downloads/release/python-3810/)
+
 # Classificação de tipos de pokémons utilizando métodos de aprendizado de máquina
- Implementação de um modelo de aprendizado de máquina supervisionado para classificação de pokémons por tipo, utilizando Árvore de Decisão, Floresta Aleatória, testes com validação cruzada e algumas técnicas de pré-processamento (Trabalho Prático 1 e 2 da disciplina de Aprendizado de Máquina - DCOMP - UFSJ).
+ Implementação de um modelo de aprendizado de máquina supervisionado para classificação de pokémons por tipo, utilizando Árvore de Decisão, Floresta Aleatória, testes com validação cruzada e algumas técnicas de pré-processamento (Trabalhos Práticos 1 e 2 da disciplina de Aprendizado de Máquina - DCOMP - UFSJ).
  
  # Requisitos
  
- - Python 3.8 ou superior
- - Biblioteca scikit-learn
- - Biblioteca pandas
- - Biblioteca numpy
- - Biblioteca Matplotlib
+ - [Python](https://python.org) 3.8 ou superior
+ - Biblioteca [scikit-learn](https://scikit-learn.org/stable/index.html)
+
+       pip install -U scikit-learn
+       
+ - Biblioteca [pandas](https://pandas.pydata.org/)
+
+       pip install pandas
+       
+ - Biblioteca [numpy](https://numpy.org/)
+
+       pip install numpy
+       
+ - Biblioteca [Matplotlib](https://matplotlib.org/)
  
-        pip install -U scikit-learn
-        pip install pandas
-        pip install numpy
-        pip install matplotlib
+       pip install matplotlib
         
  # Execução
  
