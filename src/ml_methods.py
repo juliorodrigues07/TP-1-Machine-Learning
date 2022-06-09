@@ -18,14 +18,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import warnings
+import os
 
 
 warnings.filterwarnings("ignore")
+os.chdir('../')
+dataset_name = 'pokemon.csv'
+csv_dir = '/Datasets/'
 
 
 def dataset_divisor():
 
-    pokemon_dateset = pd.read_csv('pokemon.csv')
+    pokemon_dateset = pd.read_csv(os.getcwd() + csv_dir + dataset_name)
 
     model_predictors = pokemon_dateset.drop(['type1', 'type2'], axis='columns')
     model_class = pokemon_dateset['type1']
