@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.impute import SimpleImputer
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn import tree
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -112,6 +113,22 @@ def random_forest(attributes, classes, class_names):
     result = accuracy_score(test_classes, predictions)
     print('\nFloresta Aleatória: ' + str(result) + '\n')
 
+
+def grandient_boosting(attributes, classes):
+    
+    training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes,
+                                                                                            classes,
+                                                                                            test_size=0.2,
+                                                                                            random_state=0)
+    
+    classifier = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0).fit(training_attributes, 
+                                                                                                                    training_classes)
+
+    predictions = classifier.predict(test_attributes)
+    result = accuracy_score(test_classes, predictions)
+    print('\nGradient Boosting: ' + str(result) + '\n')
+
+    
 
 def summary(class_names, test_classes, predictions):
 
