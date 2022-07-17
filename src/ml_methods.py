@@ -5,26 +5,34 @@ from sklearn.model_selection import learning_curve
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.impute import SimpleImputer
+from datetime import datetime
 from sklearn import tree
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import warnings
+import joblib
 import os
 
 
+now = datetime.now()
 warnings.filterwarnings("ignore")
 os.chdir('../')
 dataset_name = 'pokemon.csv'
 csv_dir = '/Datasets/'
+model_dir = '/Models/'
+out_file_name = '_model_' + str(now.date()) + '_' + str(now.hour) + '_' + str(now.minute) + '_' + str(now.second) + '.sav'
+
+if not os.path.exists(os.getcwd() + model_dir):
+    os.mkdir(os.getcwd() + model_dir)
 
 
 def dataset_divisor():
@@ -49,11 +57,11 @@ def pre_processing(attributes, classes):
     attributes = fill_mv.fit_transform(attributes.copy())
 
     # Descarta atributos irrelevantes (Ganho de informação pequeno ou nulo)
-    # classifier = ExtraTreesClassifier(n_estimators=100)
-    # classifier = classifier.fit(attributes, classes)
+    classifier = ExtraTreesClassifier(n_estimators=100)
+    classifier = classifier.fit(attributes, classes)
 
-    # discard = SelectFromModel(classifier, prefit=True)
-    # attributes = discard.transform(attributes.copy())
+    discard = SelectFromModel(classifier, prefit=True)
+    attributes = discard.transform(attributes.copy())
 
     # Discretiza os valores da classe
     l_encoder_classes = LabelEncoder()
@@ -74,8 +82,9 @@ def decision_tree(classifier, training_attributes, training_classes, test_attrib
 
     summary(class_names, test_classes, predictions)
 
-    # Resultado
+    # Resultado e salvamento do modelo
     result = accuracy_score(test_classes, predictions)
+    joblib.dump(classifier, os.getcwd() + model_dir + 'DecisionTree' + out_file_name)
     return result
 
 
@@ -119,7 +128,27 @@ def random_forest(attributes, classes, class_names):
     summary(class_names, test_classes, predictions)
 
     result = accuracy_score(test_classes, predictions)
+    joblib.dump(classifier, os.getcwd() + model_dir + 'RandomForest' + out_file_name)
     print('\nFloresta Aleatória: ' + str(result) + '\n')
+
+
+def grandient_boosting(attributes, classes, class_names):
+
+    training_attributes, test_attributes, training_classes, test_classes = train_test_split(attributes,
+                                                                                            classes,
+                                                                                            test_size=0.2,
+                                                                                            random_state=0)
+
+    # Construção do Gradient Boosting e treinamento do classificador
+    classifier = GradientBoostingClassifier(n_estimators=100, learning_rate=0.3, max_depth=5, random_state=0)
+    classifier.fit(training_attributes, training_classes)
+    predictions = classifier.predict(test_attributes)
+
+    summary(class_names, test_classes, predictions)
+
+    result = accuracy_score(test_classes, predictions)
+    joblib.dump(classifier, os.getcwd() + model_dir + 'GradientBoosting' + out_file_name)
+    print('\nGradient Boosting: ' + str(result) + '\n')
 
 
 def summary(class_names, test_classes, predictions):
@@ -128,7 +157,7 @@ def summary(class_names, test_classes, predictions):
     print(classification_report(test_classes, predictions, target_names=class_names))
 
     ConfusionMatrixDisplay.from_predictions(test_classes, predictions,
-                                            display_labels=class_names, xticks_rotation='vertical')
+                                            display_labels=class_names, cmap='Blues', xticks_rotation='vertical')
     plt.xlabel('Previsões')
     plt.ylabel('Tipo verdadeiro')
     plt.show()
